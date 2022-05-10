@@ -1,0 +1,20 @@
+{
+  "name": "iu-vpcm/rivet2-pagination",
+  "description": "a lib to generate pagination of IU Rivet v2 ",
+  "license": "GPL-3.0-only",
+  "authors": [
+    {
+      "name": "Qiwen Zhu",
+      "email": "qiwzhu@iu.edu"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "phpunit/phpunit": "^9.5.18"
+  },
+  "autoload": {
+    "psr-4": {
+      "Edu\\IU\\VPCM\\Rivet\\": "src"
+    }
+  }
+}
