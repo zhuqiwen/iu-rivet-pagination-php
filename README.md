@@ -35,12 +35,67 @@ echo $pagination->render();
 ```
 
 ### Advanced
+#### V1 pagination
+```PHP
+// not required
+$v1Settings = [
+    'position' => 'center', // or 'right'
+    'size' => 'small'
+];
 
+$options = [
+    'rivetVersion' => 'v1', // required if V1 pagination is desired 
+    'rivetV1Settings' => $v1Settings // it not set or empty, default style of V1 will be applied
+];
+$pagination = new \Edu\IU\VPCM\Rivet\Pagination(150, $options);
+echo $pagination->render();
+```
 
-## States
-There are 2 basic states of pagination:
-1. when the number of pages <= pagination width
-2. when it's > pagination width
+#### Set pagination length/width
+```PHP
+/**
+*   default
+*   protected $paginationLength = 5;
+ */
+$totalNumItems = 100;
+$options = ['paginationLength' => 10]
+$pagination = new Pagination($totalNumItems, $options);
+echo $pagination->render();
+```
 
-### number pages <= pagination width
-### number pages > pagination width
+#### Set the number of items to display per page
+```PHP
+/**
+*   default
+*   protected $perPage = 9;
+ */
+$totalNumItems = 100;
+$options = ['perPage' => 10]
+$pagination = new Pagination($totalNumItems, $options);
+echo $pagination->render();
+```
+
+#### Set which key in $_GET indicates page number
+```PHP
+/**
+*   default
+*   protected $pageKeyInGet = 'page';
+ */
+$totalNumItems = 100;
+$options = ['pageKeyInGet' => 'myPage']
+$pagination = new Pagination($totalNumItems, $options);
+echo $pagination->render();
+```
+
+#### If custom query string is needed
+```PHP
+/**
+*   default
+*   protected $queryString = $_SERVER['QUERY_STRING];
+ */
+$totalNumItems = 100;
+$options = ['queryString' => '?tom=jerry&mj=forever'] // the '?' can be omitted 
+$pagination = new Pagination($totalNumItems, $options);
+echo $pagination->render();
+```
+
