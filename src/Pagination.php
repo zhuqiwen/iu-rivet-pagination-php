@@ -89,10 +89,18 @@ class Pagination {
                 ?
                 'rvt-pagination--small' : '';
         $position =
-            !isset($this->rivetV1Settings['position']) ? ''
-            : $this->rivetV1Settings['position'] == 'right' ?'rvt-pagination--right'
-                : $this->rivetV1Settings['position'] == 'center' ? 'rvt-pagination--center'
-                    : '';
+            !isset($this->rivetV1Settings['position']) ?
+                ''
+                :
+                (
+                    $this->rivetV1Settings['position'] == 'right' ?
+                        'rvt-pagination--right'
+                        :
+                        (
+                            $this->rivetV1Settings['position'] == 'center' ?
+                                'rvt-pagination--center' : ''
+                        )
+                );
 
         $html = <<< V1
 <nav role="navigation" aria-label="More pages of items">
