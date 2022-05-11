@@ -16,7 +16,7 @@ require 'PATH-TO/rivet_pagination.php';
 ```
 ## Usage
 ### Basic
-**NOTE:** If not specified in `$options['rivet']`, the lib generates [Pagination of Rivet V2](https://v2.rivet.iu.edu/docs/components/pagination/).
+**NOTE:** If not specified in `$options['rivetVersion']`, the lib generates [Pagination of Rivet V2](https://v2.rivet.iu.edu/docs/components/pagination/).
 
 The only required argument is the number of items that need to be paginated.
 
