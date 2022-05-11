@@ -9,17 +9,18 @@ namespace Edu\IU\VPCM\Rivet;
 
 class Pagination {
     protected $pageKeyInGet = 'page';
-    protected $baseUrl;
+    protected $queryString;
     protected $perPage = 9;
     protected $totalItems;
     protected $paginationLength = 5;
     protected $last;
     protected $rivetVersion = 2;
 
-    public function __construct(string $baseUrl, int $total, array $options = [])
+    public function __construct(int $total, array $options = [])
     {
-        $this->baseUrl = $baseUrl;
         $this->totalItems = $total;
+
+        $this->queryString = isset($options['queryString']) ? str_replace('?', '', $options['queryString']) : $_SERVER['QUERY_STRING'];
         $this->rivetVersion = isset($options['rivet']) ? $options['rivet'] : $this->rivetVersion;
         $this->perPage = isset($options['perPage']) ? $options['perPage'] : $this->perPage;
         $this->pageKeyInGet = isset($options['pageKey']) ? $options['pageKey'] : $this->pageKeyInGet;
@@ -68,9 +69,16 @@ PAGINATION;
             1;
     }
 
-    protected function getCurrentUrl(): string
+    public function getNewUrl(int $pageNum)
     {
-        return $_SERVER['REQUEST_URI'];
+        $hostAndPath = explode('?', $_SERVER['REQUEST_URI'])[0];
+        parse_str($this->queryString, $params);
+        unset($params[$this->pageKeyInGet]);
+        $params[$this->pageKeyInGet] = $pageNum;
+        $newQuery = http_build_query($params);
+
+        return implode('?', [$hostAndPath, $newQuery]);
+
     }
 
     protected function getTotalPageLinks(): int
@@ -116,7 +124,7 @@ PAGINATION;
              * << < ... 6 7 8 ... > >>
              */
             else{
-                $html .= $this->buildDots($this->getCurrentPage() - 1);
+                $html .= $this->buildDots($this->getCurrentPage() - $this->paginationLength + 2);
                 for($i = 0; $i < $this->paginationLength - 2; $i++){
                     $pageNum = $this->getCurrentPage() + $i;
                     $html .= $this->buildSingleLink($pageNum);
@@ -132,9 +140,7 @@ PAGINATION;
 
     public function buildSingleLink(int $pageNum): string
     {
-        $oldPageQuery = $this->pageKeyInGet . '=' . $this->getCurrentPage();
-        $newPageQuery = $this->pageKeyInGet . '=' . $pageNum;
-        $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
+        $url = $this->getNewUrl($pageNum);
         $current = $pageNum == $this->getCurrentPage() ? 'aria-current="page"' : '';
         $html = <<< LINK
 <li class="rvt-pagination__item">
@@ -147,9 +153,8 @@ LINK;
 
     public function buildDots(int $pageNum)
     {
-        $oldPageQuery = $this->pageKeyInGet . '=' . $this->getCurrentPage();
-        $newPageQuery = $this->pageKeyInGet . '=' . $pageNum;
-        $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
+        $url = $this->getNewUrl($pageNum);
+
         return <<< DOTS
 <li class="rvt-pagination__item">
       <a href="$url" class="rvt-flex" tabindex="-1" aria-hidden="true">
@@ -186,10 +191,7 @@ NEXT;
 
     protected function buildNextLink()
     {
-        $nextPage = $this->getCurrentPage() + 1;
-        $oldPageQuery = $this->pageKeyInGet . '=' . $this->getCurrentPage();
-        $newPageQuery = $this->pageKeyInGet . '=' . $nextPage;
-        $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
+        $url = $this->getNewUrl($nextPage);
 
         return $this->hasNext()
             ? '<a href="' . $url . '" aria-label="Go to next page">'
@@ -218,9 +220,7 @@ NEXTSET;
 
     protected function buildLinkToLast(): string
     {
-        $oldPageQuery = $this->pageKeyInGet . '=' . $this->getCurrentPage();
-        $newPageQuery = $this->pageKeyInGet . '=' . $this->last;
-        $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
+        $url = $this->getNewUrl($this->last);
 
         return $this->hasNext()
             ? '<a href="' . $url . '" aria-label="Go to next page">'
@@ -250,10 +250,7 @@ PREV;
 
     protected function buildPrevLink(): string
     {
-        $prevPage = $this->getCurrentPage() - 1;
-        $oldPageQuery = $this->pageKeyInGet . '=' . $this->getCurrentPage();
-        $newPageQuery = $this->pageKeyInGet . '=' . $prevPage;
-        $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
+        $url = $this->getNewUrl($prevPage);
 
         return $this->hasPrev()
             ? '<a href="' . $url . '" aria-label="Go to next page">'
@@ -281,9 +278,7 @@ PREVSET;
 
     public function buildLinkToFirst(): string
     {
-        $oldPageQuery = $this->pageKeyInGet . '=' . $this->getCurrentPage();
-        $newPageQuery = $this->pageKeyInGet . '=1';
-        $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
+        $url = $this->getNewUrl(1);
 
         return $this->hasPrev()
             ? '<a href="' . $url . '" aria-label="Go to first page">'
