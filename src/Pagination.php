@@ -8,15 +8,43 @@ namespace Edu\IU\VPCM\Rivet;
  */
 
 class Pagination {
+    /**
+     * @var mixed|string
+     */
     protected $pageKeyInGet = 'page';
+    /**
+     * @var array|mixed|string|string[]
+     */
     protected $queryString;
+    /**
+     * @var int|mixed
+     */
     protected $perPage = 9;
+    /**
+     * @var int
+     */
     protected $totalItems;
+    /**
+     * @var int|mixed
+     */
     protected $paginationLength = 5;
+    /**
+     * @var int
+     */
     protected $last;
+    /**
+     * @var mixed|string
+     */
     protected $rivetVersion = 'v2';
+    /**
+     * @var array|mixed
+     */
     protected $rivetV1Settings;
 
+    /**
+     * @param int $total
+     * @param array $options
+     */
     public function __construct(int $total, array $options = [])
     {
         $this->totalItems = $total;
@@ -48,6 +76,9 @@ class Pagination {
     }
 
 
+    /**
+     * @return string
+     */
     public function renderV1()
     {
         $prev = $this->buildPreviousV1();
@@ -77,11 +108,17 @@ V1;
 
     }
 
+    /**
+     * @return string
+     */
     public function buildFirstV1(): string
     {
         return $this->buildSingleLinkV1(1);
     }
 
+    /**
+     * @return string
+     */
     public function buildPreviousV1(): string
     {
         $link = $this->getNewUrl($this->getCurrentPage() - 1);
@@ -95,12 +132,18 @@ PREVV1;
     }
 
 
+    /**
+     * @return string
+     */
     public function buildLastV1(): string
     {
         return $this->buildSingleLinkV1($this->last);
     }
 
 
+    /**
+     * @return string
+     */
     public function buildNextV1(): string
     {
         $link = $this->getNewUrl($this->getCurrentPage() + 1);
@@ -114,6 +157,9 @@ NEXTV1;
     }
 
 
+    /**
+     * @return string
+     */
     public function buildPageLinksV1(): string
     {
         $html = '';
@@ -166,6 +212,10 @@ NEXTV1;
     }
 
 
+    /**
+     * @param int $pageNum
+     * @return string
+     */
     public function buildSingleLinkV1(int $pageNum): string
     {
         $url = $this->getNewUrl($pageNum);
@@ -185,17 +235,19 @@ LINKV1;
     }
 
 
+    /**
+     * @param int $pageNum
+     * @return string
+     */
     public function buildDotsV1(int $pageNum)
     {
         return $this->buildDots($pageNum);
     }
 
 
-
-
-
-
-
+    /**
+     * @return string
+     */
     public function renderV2()
     {
         $first = $this->buildFirst();
@@ -219,6 +271,9 @@ V2;
         return $html;
     }
 
+    /**
+     * @return string
+     */
     public function buildPageLinks(): string
     {
         $html = '';
@@ -266,6 +321,10 @@ V2;
         return $html;
     }
 
+    /**
+     * @param int $pageNum
+     * @return string
+     */
     public function buildSingleLink(int $pageNum): string
     {
         $url = $this->getNewUrl($pageNum);
@@ -279,6 +338,10 @@ LINK;
         return $html;
     }
 
+    /**
+     * @param int $pageNum
+     * @return string
+     */
     public function buildDots(int $pageNum)
     {
         $url = $this->getNewUrl($pageNum);
@@ -300,6 +363,9 @@ DOTS;
 
     }
 
+    /**
+     * @return string
+     */
     protected function buildNext(): string
     {
         $v2Link = $this->buildNextLink();
@@ -317,6 +383,9 @@ NEXT;
         return $v2;
     }
 
+    /**
+     * @return string
+     */
     protected function buildNextLink()
     {
         $url = $this->getNewUrl($this->getCurrentPage() + 1);
@@ -326,6 +395,9 @@ NEXT;
             : '';
     }
 
+    /**
+     * @return string
+     */
     protected function buildLast(): string
     {
         $v2Link = $this->buildLinkToLast();
@@ -346,6 +418,9 @@ NEXTSET;
         return $v2;
     }
 
+    /**
+     * @return string
+     */
     protected function buildLinkToLast(): string
     {
         $url = $this->getNewUrl($this->last);
@@ -357,7 +432,9 @@ NEXTSET;
     }
 
 
-
+    /**
+     * @return string
+     */
     protected function buildPrevious(): string
     {
         $v2Link = $this->buildPrevLink();
@@ -376,6 +453,9 @@ PREV;
     }
 
 
+    /**
+     * @return string
+     */
     protected function buildPrevLink(): string
     {
         $url = $this->getNewUrl($this->getCurrentPage() - 1);
@@ -385,6 +465,9 @@ PREV;
             : '';
     }
 
+    /**
+     * @return string
+     */
     protected function buildFirst(): string
     {
         $v2Link = $this->buildLinkToFirst();
@@ -404,6 +487,9 @@ PREVSET;
         return $v2;
     }
 
+    /**
+     * @return string
+     */
     public function buildLinkToFirst(): string
     {
         $url = $this->getNewUrl(1);
@@ -416,11 +502,17 @@ PREVSET;
 
     //checkers
 
+    /**
+     * @return bool
+     */
     private function hasPrev(): bool
     {
         return $this->getCurrentPage() != 1;
     }
 
+    /**
+     * @return bool
+     */
     private function hasNext(): bool
     {
         return $this->getCurrentPage() != $this->last;
@@ -428,11 +520,18 @@ PREVSET;
 
 
     //getters
+
+    /**
+     * @return int
+     */
     public function getLast()
     {
         return $this->last;
     }
 
+    /**
+     * @return int|mixed
+     */
     public function getPaginationLength()
     {
         return $this->paginationLength;
@@ -440,6 +539,10 @@ PREVSET;
 
 
     //helpers
+
+    /**
+     * @return int
+     */
     public function getCurrentPage(): int
     {
         return
@@ -450,6 +553,10 @@ PREVSET;
                 1;
     }
 
+    /**
+     * @param int $pageNum
+     * @return string
+     */
     public function getNewUrl(int $pageNum)
     {
         $hostAndPath = explode('?', $_SERVER['REQUEST_URI'])[0];
@@ -462,6 +569,9 @@ PREVSET;
 
     }
 
+    /**
+     * @return int
+     */
     protected function getTotalPageLinks(): int
     {
         return  ceil($this->totalItems / $this->perPage);
