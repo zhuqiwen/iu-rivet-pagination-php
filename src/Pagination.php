@@ -250,7 +250,7 @@ PREV;
 
     protected function buildPrevLink(): string
     {
-        $url = $this->getNewUrl($prevPage);
+        $url = $this->getNewUrl($this->getCurrentPage() - 1);
 
         return $this->hasPrev()
             ? '<a href="' . $url . '" aria-label="Go to next page">'
