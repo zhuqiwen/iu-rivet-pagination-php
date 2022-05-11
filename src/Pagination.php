@@ -14,11 +14,13 @@ class Pagination {
     protected $totalItems;
     protected $paginationLength = 5;
     protected $last;
+    protected $rivetVersion = 2;
 
     public function __construct(string $baseUrl, int $total, array $options = [])
     {
         $this->baseUrl = $baseUrl;
         $this->totalItems = $total;
+        $this->rivetVersion = isset($options['rivet']) ? $options['rivet'] : $this->rivetVersion;
         $this->perPage = isset($options['perPage']) ? $options['perPage'] : $this->perPage;
         $this->pageKeyInGet = isset($options['pageKey']) ? $options['pageKey'] : $this->pageKeyInGet;
         $this->paginationLength = isset($options['paginationLength']) ? $options['paginationLength'] : $this->paginationLength;
