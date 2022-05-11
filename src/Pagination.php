@@ -191,7 +191,7 @@ NEXT;
 
     protected function buildNextLink()
     {
-        $url = $this->getNewUrl($nextPage);
+        $url = $this->getNewUrl($this->getCurrentPage() + 1);
 
         return $this->hasNext()
             ? '<a href="' . $url . '" aria-label="Go to next page">'
