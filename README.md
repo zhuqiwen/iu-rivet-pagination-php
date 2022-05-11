@@ -1,4 +1,9 @@
 # Rivet Pagination
+Well, the name tells everything. Hopefully this lib helps ease your life.
+
+If more details of Pagination of Rivet V1 and V2 are needed:
+1. [V1](https://rivet.iu.edu/components/navigation/pagination/)
+2. [V2](https://v2.rivet.iu.edu/docs/components/pagination/)
 ## Installation
 2 ways: using [Composer](https://getcomposer.org/), or direct `include`/`require`
 
