@@ -22,11 +22,11 @@ class Pagination {
         $this->totalItems = $total;
 
         $this->queryString = isset($options['queryString']) ? str_replace('?', '', $options['queryString']) : $_SERVER['QUERY_STRING'];
-        $this->rivetVersion = isset($options['rivet']) ? $options['rivet'] : $this->rivetVersion;
+        $this->rivetVersion = isset($options['rivetVersion']) ? $options['rivetVersion'] : $this->rivetVersion;
         $this->perPage = isset($options['perPage']) ? $options['perPage'] : $this->perPage;
-        $this->pageKeyInGet = isset($options['pageKey']) ? $options['pageKey'] : $this->pageKeyInGet;
+        $this->pageKeyInGet = isset($options['pageKeyInGet']) ? $options['pageKeyInGet'] : $this->pageKeyInGet;
         $this->paginationLength = isset($options['paginationLength']) ? $options['paginationLength'] : $this->paginationLength;
-        $this->rivetV1Settings = isset($options['rivet']) && $options['rivet'] == 'v1' && isset($options['rivetV1Settings'])
+        $this->rivetV1Settings = isset($options['rivetVersion']) && $options['rivetVersion'] == 'v1' && isset($options['rivetV1Settings'])
             ? $options['rivetV1Settings'] : [];
         $this->last = $this->getTotalPageLinks();
     }

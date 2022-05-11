@@ -16,6 +16,8 @@ require 'PATH-TO/rivet_pagination.php';
 ```
 ## Usage
 ### Basic
+**NOTE:** If not specified in `$options['rivet']`, the lib generates [Pagination of Rivet V2](https://v2.rivet.iu.edu/docs/components/pagination/).
+
 The only required argument is the number of items that need to be paginated.
 
 Other parameters such as the number of items per page, and the key in `$_GET` that indicates current page number, are listed below with their default values
@@ -31,6 +33,9 @@ $totalNumItems = 100;
 $pagination = new Pagination($totalNumItems);
 echo $pagination->render();
 ```
+
+### Advanced
+
 
 ## States
 There are 2 basic states of pagination:
