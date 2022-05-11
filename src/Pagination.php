@@ -14,7 +14,8 @@ class Pagination {
     protected $totalItems;
     protected $paginationLength = 5;
     protected $last;
-    protected $rivetVersion = 2;
+    protected $rivetVersion = 'v2';
+    protected $rivetV1Settings;
 
     public function __construct(int $total, array $options = [])
     {
@@ -25,6 +26,8 @@ class Pagination {
         $this->perPage = isset($options['perPage']) ? $options['perPage'] : $this->perPage;
         $this->pageKeyInGet = isset($options['pageKey']) ? $options['pageKey'] : $this->pageKeyInGet;
         $this->paginationLength = isset($options['paginationLength']) ? $options['paginationLength'] : $this->paginationLength;
+        $this->rivetV1Settings = isset($options['rivet']) && $options['rivet'] == 'v1' && isset($options['rivetV1Settings'])
+            ? $options['rivetV1Settings'] : [];
         $this->last = $this->getTotalPageLinks();
     }
 
@@ -35,59 +38,186 @@ class Pagination {
      */
     public function render(): string
     {
+        $method = 'render' . $this->rivetVersion;
+        $html = 'some error message';
+        if(method_exists($this, $method)){
+            $html = $this->$method();
+        }
+
+        return $html;
+    }
+
+
+    public function renderV1()
+    {
+        $prev = $this->buildPreviousV1();
+        $next = $this->buildNextV1();
+        $pageLinks = $this->buildPageLinksV1();
+        $isSmall =
+            isset($this->rivetV1Settings['size']) && $this->rivetV1Settings['size'] == 'small'
+                ?
+                'rvt-pagination--small' : '';
+        $position =
+            !isset($this->rivetV1Settings['position']) ? ''
+            : $this->rivetV1Settings['position'] == 'right' ?'rvt-pagination--right'
+                : $this->rivetV1Settings['position'] == 'center' ? 'rvt-pagination--center'
+                    : '';
+
+        $html = <<< V1
+<nav role="navigation" aria-label="More pages of items">
+    <ul class="rvt-pagination $isSmall $position">
+        $prev 
+        $pageLinks 
+        $next
+    </ul>
+</nav>
+V1;
+
+        return $html;
+
+    }
+
+    public function buildFirstV1(): string
+    {
+        return $this->buildSingleLinkV1(1);
+    }
+
+    public function buildPreviousV1(): string
+    {
+        $link = $this->getNewUrl($this->getCurrentPage() - 1);
+        $html = <<< PREVV1
+<li class="rvt-pagination__item">
+  <a href="$link" aria-label="Previous page">Previous</a>
+</li>
+PREVV1;
+
+        return $this->hasPrev() ? $html : '';
+    }
+
+
+    public function buildLastV1(): string
+    {
+        return $this->buildSingleLinkV1($this->last);
+    }
+
+
+    public function buildNextV1(): string
+    {
+        $link = $this->getNewUrl($this->getCurrentPage() + 1);
+        $html = <<< NEXTV1
+<li class="rvt-pagination__item">
+  <a href="$link" arial-label="Next page">Next</a>
+</li>
+NEXTV1;
+
+        return $this->hasNext() ? $html : '';
+    }
+
+
+    public function buildPageLinksV1(): string
+    {
+        $html = '';
+        /**
+         * 1 2 3 4 5
+         */
+        if($this->last <= $this->paginationLength){
+            for ($i = 1; $i <= $this->last; $i ++){
+                $html .= $this->buildSingleLinkV1($i);
+            }
+        }else{
+            /**
+             * 1 2 3 4 ... last
+             */
+            if($this->getCurrentPage() < $this->paginationLength){
+                for($i = 1; $i < $this->paginationLength; $i++){
+                    $html .= $this->buildSingleLinkV1($i);
+                }
+                $html .= $this->buildDotsV1($this->paginationLength);
+                $html .= $this->buildLastV1();
+            }
+            /**
+             * 1 ... last4 last3 last2 last
+             */
+            elseif($this->getCurrentPage() > $this->last - $this->paginationLength + 1){
+                $html .= $this->buildFirstV1();
+                $html .= $this->buildDotsV1($this->last - $this->paginationLength + 1);
+                for ($i = 1; $i < $this->paginationLength; $i++){
+                    $pageNum = $this->last - $this->paginationLength + 1 + $i;
+                    $html .= $this->buildSingleLinkV1($pageNum);
+                }
+            }
+            /**
+             * 1 ... 6 7 8 ... last
+             */
+            else{
+                $html .= $this->buildFirstV1();
+                $html .= $this->buildDotsV1($this->getCurrentPage() - $this->paginationLength + 2);
+                for($i = 0; $i < $this->paginationLength - 2; $i++){
+                    $pageNum = $this->getCurrentPage() + $i;
+                    $html .= $this->buildSingleLinkV1($pageNum);
+                }
+                $html .= $this->buildDotsV1($this->getCurrentPage() + $this->paginationLength - 2);
+                $html .= $this->buildLastV1();
+            }
+        }
+
+        return $html;
+
+    }
+
+
+    public function buildSingleLinkV1(int $pageNum): string
+    {
+        $url = $this->getNewUrl($pageNum);
+        $current = $pageNum == $this->getCurrentPage() ? 'aria-current="true"' : '';
+        $isActive = $pageNum == $this->getCurrentPage() ? 'is-active' : '';
+        $arialLabel = 'Page ' . $pageNum;
+        $arialLabel .= $pageNum == $this->last ? ', last page' : '';
+        $arialLabel .= $pageNum == 1 ? ', first page' : '';
+        $arialLabel .= $pageNum == $this->getCurrentPage() ? ', current page' : '';
+        $html = <<< LINKV1
+<li class="rvt-pagination__item $isActive" >
+    <a href="$url" aria-label="$arialLabel" $current>$pageNum</a>
+</li>
+LINKV1;
+
+        return $html;
+    }
+
+
+    public function buildDotsV1(int $pageNum)
+    {
+        return $this->buildDots($pageNum);
+    }
+
+
+
+
+
+
+
+    public function renderV2()
+    {
         $first = $this->buildFirst();
         $prev = $this->buildPrevious();
         $last = $this->buildLast();
         $next = $this->buildNext();
         $pageLinks = $this->buildPageLinks();
 
-        $html = <<< PAGINATION
+        $html = <<< V2
 <nav role="navigation" aria-label="More pages of items">
     <ul class="rvt-pagination">
-    $first
-    $prev
-    $pageLinks
-    $next
-    $last
+        $first 
+        $prev 
+        $pageLinks 
+        $next 
+        $last
     </ul>
 </nav>
-PAGINATION;
-
+V2;
 
         return $html;
     }
-
-
-
-    public function getCurrentPage(): int
-    {
-        return
-        (isset($_GET[$this->pageKeyInGet]) && filter_var($_GET[$this->pageKeyInGet], FILTER_VALIDATE_INT))
-            ?
-            $_GET[$this->pageKeyInGet]
-            :
-            1;
-    }
-
-    public function getNewUrl(int $pageNum)
-    {
-        $hostAndPath = explode('?', $_SERVER['REQUEST_URI'])[0];
-        parse_str($this->queryString, $params);
-        unset($params[$this->pageKeyInGet]);
-        $params[$this->pageKeyInGet] = $pageNum;
-        $newQuery = http_build_query($params);
-
-        return implode('?', [$hostAndPath, $newQuery]);
-
-    }
-
-    protected function getTotalPageLinks(): int
-    {
-        return  ceil($this->totalItems / $this->perPage);
-    }
-
-
-
 
     public function buildPageLinks(): string
     {
@@ -134,8 +264,6 @@ PAGINATION;
         }
 
         return $html;
-
-
     }
 
     public function buildSingleLink(int $pageNum): string
@@ -157,7 +285,7 @@ LINK;
 
         return <<< DOTS
 <li class="rvt-pagination__item">
-      <a href="$url" class="rvt-flex" tabindex="-1" aria-hidden="true">
+      <a href="$url" class="rvt-flex" aria-label="Skip to page $pageNum">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
           <g fill="currentColor">
             <circle cx="8" cy="8" r="2"></circle>
@@ -308,6 +436,35 @@ PREVSET;
     public function getPaginationLength()
     {
         return $this->paginationLength;
+    }
+
+
+    //helpers
+    public function getCurrentPage(): int
+    {
+        return
+            (isset($_GET[$this->pageKeyInGet]) && filter_var($_GET[$this->pageKeyInGet], FILTER_VALIDATE_INT))
+                ?
+                $_GET[$this->pageKeyInGet]
+                :
+                1;
+    }
+
+    public function getNewUrl(int $pageNum)
+    {
+        $hostAndPath = explode('?', $_SERVER['REQUEST_URI'])[0];
+        parse_str($this->queryString, $params);
+        unset($params[$this->pageKeyInGet]);
+        $params[$this->pageKeyInGet] = $pageNum;
+        $newQuery = http_build_query($params);
+
+        return implode('?', [$hostAndPath, $newQuery]);
+
+    }
+
+    protected function getTotalPageLinks(): int
+    {
+        return  ceil($this->totalItems / $this->perPage);
     }
 
 }
