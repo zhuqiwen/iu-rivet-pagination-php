@@ -81,25 +81,63 @@ PAGINATION;
 
     public function buildPageLinks(): string
     {
+        $html = '';
         /**
          * << < 1 2 3 4 5 > >>
          */
-        if($this->last == $this->paginationLength){
-            for ($i = 0; $i < $this->paginationLength; $i ++){
-
+        if($this->last <= $this->paginationLength){
+            for ($i = 1; $i <= $this->last; $i ++){
+                $html .= $this->buildSingleLink($i);
+            }
+        }else{
+            /**
+             * << < 1 2 3 4 ... > >>
+             */
+            if($this->getCurrentPage() < $this->paginationLength){
+                for($i = 1; $i < $this->paginationLength; $i++){
+                    $html .= $this->buildSingleLink($i);
+                }
+                $html .= $this->buildDots('#0');
+            }
+            /**
+             * << < ... last4 last3 last2 last > >>
+             */
+            elseif($this->getCurrentPage() > $this->last - $this->paginationLength + 1){
+                $html .= $this->buildDots('#0');
+                for ($i = 1; $i < $this->paginationLength; $i++){
+                    $pageNum = $this->last - $this->paginationLength + 1 + $i;
+                    $html .= $this->buildSingleLink($pageNum);
+                }
+            }
+            /**
+             * << < ... 6 7 8 ... > >>
+             */
+            else{
+                $html .= $this->buildDots('#0');
+                for($i = 0; $i < $this->paginationLength - 2; $i++){
+                    $pageNum = $this->getCurrentPage() + $i;
+                    $html .= $this->buildSingleLink($pageNum);
+                }
+                $html .= $this->buildDots('#0');
             }
         }
-        /**
-         * << < 1 2 3 4 ... > >>
-         */
 
-        /**
-         * << < ... 6 7 8 ... > >>
-         */
+        return $html;
 
-        /**
-         * << < ... last4 last3 last2 last > >>
-         */
+
+    }
+
+    public function buildSingleLink(int $pageNum): string
+    {
+        $url = '#0';
+        $current = $pageNum == $this->getCurrentPage() ? 'aria-current="page"' : '';
+        $html = <<< LINK
+<li class="rvt-pagination__item">
+    <a href="$url" aria-label="Page $pageNum" $current>$pageNum</a>
+</li>
+LINK;
+
+        return $html;
     }
 
     public function buildDots(string $url)
