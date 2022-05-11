@@ -36,6 +36,7 @@ echo $pagination->render();
 
 ### Advanced
 #### V1 pagination
+[Pagination of Rivet V1](https://rivet.iu.edu/components/navigation/pagination/)
 ```PHP
 // not required
 $v1Settings = [
