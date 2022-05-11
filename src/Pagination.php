@@ -59,7 +59,7 @@ PAGINATION;
 
 
 
-    protected function getCurrentPage(): int
+    public function getCurrentPage(): int
     {
         return
         (isset($_GET[$this->pageKeyInGet]) && filter_var($_GET[$this->pageKeyInGet], FILTER_VALIDATE_INT))
