@@ -19,9 +19,9 @@ class Pagination {
     {
         $this->baseUrl = $baseUrl;
         $this->totalItems = $total;
-        $this->perPage = isset($options['perPage']) ?? $this->perPage;
-        $this->pageKeyInGet = isset($options['pageKey']) ?? $this->pageKeyInGet;
-        $this->paginationLength = isset($options['paginationLength']) ?? $this->paginationLength;
+        $this->perPage = isset($options['perPage']) ? $options['perPage'] : $this->perPage;
+        $this->pageKeyInGet = isset($options['pageKey']) ? $options['pageKey'] : $this->pageKeyInGet;
+        $this->paginationLength = isset($options['paginationLength']) ? $options['paginationLength'] : $this->paginationLength;
         $this->last = $this->getTotalPageLinks();
     }
 
@@ -68,7 +68,7 @@ PAGINATION;
 
     protected function getCurrentUrl(): string
     {
-        return '';
+        return $_SERVER['REQUEST_URI'];
     }
 
     protected function getTotalPageLinks(): int
@@ -97,13 +97,14 @@ PAGINATION;
                 for($i = 1; $i < $this->paginationLength; $i++){
                     $html .= $this->buildSingleLink($i);
                 }
-                $html .= $this->buildDots('#0');
+
+                $html .= $this->buildDots($this->paginationLength);
             }
             /**
              * << < ... last4 last3 last2 last > >>
              */
             elseif($this->getCurrentPage() > $this->last - $this->paginationLength + 1){
-                $html .= $this->buildDots('#0');
+                $html .= $this->buildDots($this->last - $this->paginationLength + 1);
                 for ($i = 1; $i < $this->paginationLength; $i++){
                     $pageNum = $this->last - $this->paginationLength + 1 + $i;
                     $html .= $this->buildSingleLink($pageNum);
@@ -113,12 +114,12 @@ PAGINATION;
              * << < ... 6 7 8 ... > >>
              */
             else{
-                $html .= $this->buildDots('#0');
+                $html .= $this->buildDots($this->getCurrentPage() - 1);
                 for($i = 0; $i < $this->paginationLength - 2; $i++){
                     $pageNum = $this->getCurrentPage() + $i;
                     $html .= $this->buildSingleLink($pageNum);
                 }
-                $html .= $this->buildDots('#0');
+                $html .= $this->buildDots($this->getCurrentPage() + $this->paginationLength - 2);
             }
         }
 
@@ -129,7 +130,9 @@ PAGINATION;
 
     public function buildSingleLink(int $pageNum): string
     {
-        $url = '#0';
+        $oldPageQuery = $this->pageKeyInGet . '=' . $this->getCurrentPage();
+        $newPageQuery = $this->pageKeyInGet . '=' . $pageNum;
+        $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
         $current = $pageNum == $this->getCurrentPage() ? 'aria-current="page"' : '';
         $html = <<< LINK
 <li class="rvt-pagination__item">
@@ -140,8 +143,11 @@ LINK;
         return $html;
     }
 
-    public function buildDots(string $url)
+    public function buildDots(int $pageNum)
     {
+        $oldPageQuery = $this->pageKeyInGet . '=' . $this->getCurrentPage();
+        $newPageQuery = $this->pageKeyInGet . '=' . $pageNum;
+        $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
         return <<< DOTS
 <li class="rvt-pagination__item">
       <a href="$url" class="rvt-flex" tabindex="-1" aria-hidden="true">
@@ -214,7 +220,7 @@ NEXTSET;
         $newPageQuery = $this->pageKeyInGet . '=' . $this->last;
         $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
 
-        return $this->hasLast()
+        return $this->hasNext()
             ? '<a href="' . $url . '" aria-label="Go to next page">'
             : '';
 
@@ -277,7 +283,7 @@ PREVSET;
         $newPageQuery = $this->pageKeyInGet . '=1';
         $url = str_replace($oldPageQuery, $newPageQuery, $this->getCurrentUrl());
 
-        return $this->hasFirst()Set()
+        return $this->hasPrev()
             ? '<a href="' . $url . '" aria-label="Go to first page">'
             : '';
     }
@@ -295,24 +301,16 @@ PREVSET;
         return $this->getCurrentPage() != $this->last;
     }
 
-    private function hasFirst(): bool
-    {
-        if(!$this->hasPrev()){
-            return false;
-        }
 
-        return $this->getCurrentPage() < ($this->last - $this->paginationLength);
+    //getters
+    public function getLast()
+    {
+        return $this->last;
     }
 
-    private function hasLast(): bool
+    public function getPaginationLength()
     {
-        if(!$this->hasNext()){
-            return false;
-        }
-
-        return $this->getCurrentPage() > $this->paginationLength;
+        return $this->paginationLength;
     }
-
-
 
 }
